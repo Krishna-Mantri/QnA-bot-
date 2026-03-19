@@ -24,6 +24,8 @@ agent=create_agent(
 
 ###Building Interface
 st.subheader("QnA Chat-Bot")
+st.text("Hello User ask anything, I am here to help with the answers.")
+
 
 for message in st.session_state.history:
     role=message["role"]
