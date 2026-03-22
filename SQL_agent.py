@@ -5,6 +5,8 @@ from langchain_groq import ChatGroq
 from langchain_community.utilities import SQLDatabase
 from langchain_community.agent_toolkits import SQLDatabaseToolkit
 from langgraph.checkpoint.memory import InMemorySaver
+from langchain.agents import create_agent
+import streamlit as st
  
 db=SQLDatabase.from_uri("sqlite:///my_tasks.db")
 
@@ -22,7 +24,7 @@ db.run("""
 model=ChatGroq(model="openai/gpt-oss-20b")
 toolkit=SQLDatabaseToolkit(db=db,llm=model)
 tools=toolkit.get_tools()
-memory=InMemorySaver()
+
 
 system_prompt = """
 You are a task management assistant that interacts with a SQL database containing a 'tasks' table. 
@@ -40,3 +42,17 @@ CRUD OPERATIONS:
 
 Table schema: id, title, description, status(pending/in_progress/completed), created_at.
 """
+
+@st.cache_resources
+def get_agent():
+    agent=create_agent(
+        llm=model,
+        tools=tools,
+        checkpointer=InMemorySaver(),
+        system_prompt=system_prompt
+    )
+
+    return agent
+
+agent=get_agent()
+
